@@ -1,0 +1,32 @@
+name: Create release
+
+on:
+  push:
+    branches:
+      - "!*"
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create ZIP artifacts
+        run: |
+          zip -j main-pcb.gerber.zip hardware/main-pcb/gerbers/*
+          zip -j rear-pcb.gerber.zip hardware/rear-pcb/gerbers/*
+          zip -j side-pcb.gerber.zip hardware/side-pcb/gerbers/*
+
+      - name: Create new release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            main-pcb.gerber.zip
+            rear-pcb.gerber.zip
+            side-pcb.gerber.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
